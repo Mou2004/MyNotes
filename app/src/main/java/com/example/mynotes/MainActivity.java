@@ -1,19 +1,25 @@
 package com.example.mynotes;
 
+import android.util.Log;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+
 import androidx.core.view.WindowInsetsCompat;
 
 import java.util.ArrayList;
@@ -25,9 +31,8 @@ public class MainActivity extends AppCompatActivity {
     Button addNoteButton;
     EditText input;
     ListView previewListOfNotes;
-    //List<String> notes= new ArrayList<>();
     List<String> notes;
-    String[] startList ={"First note", "Second note"};
+    String selectedNote;
     ArrayAdapter adapter;
 
     @Override
@@ -41,60 +46,59 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
         previewListOfNotes = findViewById(R.id.notesPreviewList);
-        //notes = new ArrayList<>(Arrays.asList());
+
         notes= ((MyApplication)this.getApplication()).getNotes();
+
+        //creating adapter to populate the notes into our listview
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, notes);
 
+        //link adapter to listview
         previewListOfNotes.setAdapter(adapter);
 
-        /*notes = new ArrayList<String>(Arrays.asList(startList));
-        addNoteButton= findViewById(R.id.button);
-        input = findViewById(R.id.editTextText2);
-        previewListOfNotes = findViewById(R.id.notesPreviewList);
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, notes);
-        previewListOfNotes.setAdapter(adapter);
-        addNoteButton.setOnClickListener(new View.OnClickListener() {
+        //Feature- click on each listview item to display the entire note..
+        // For this we create onclickListener for each item of the list
+
+        previewListOfNotes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onClick(View v) {
-                String newNote = input.getText().toString();
-                notes.add(newNote);
-                Collections.sort(notes);
-
-                adapter.notifyDataSetChanged();
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+               String selectedNote = notes.get(position);
+               Toast.makeText(MainActivity.this, "Opening Selected Note",Toast.LENGTH_SHORT).show();
+               Intent intent = new Intent(MainActivity.this, single_list_view.class);
+               intent.putExtra("Note_Content", selectedNote);
+               startActivity(intent);
             }
-        });*/
-
+        });
 
     }
     protected void onResume(){
 
         super.onResume();
-        Intent writteNote= getIntent();
-        String note = writteNote.getStringExtra("Note");
-        if (note != null && !note.isEmpty()) {
-           // TextView newNoteview = findViewById(R.id.textView);
-           // newNoteview.setText(note);
+        Intent writtenNote= getIntent();
+        // a null check for intent to make sure that the next intent/activity isn't empty
+        if (writtenNote != null) {
+            String note = writtenNote.getStringExtra("Note");
+            if (note != null && !note.isEmpty()) {
+                // TextView newNoteview = findViewById(R.id.textView);
+                // newNoteview.setText(note);
 
-            if (!notes.contains(note)) { // Prevent duplicates
-                notes.add(note);
-                Collections.sort(notes);
-                adapter.notifyDataSetChanged();
+                if (!notes.contains(note)) { // Prevent duplicates
+                    //adding the input notes to the note list
+                    notes.add(note);
+                    Collections.sort(notes);
+                    adapter.notifyDataSetChanged();
+                }
             }
+            // Retrieving stored data from SharedPreferences
+            SharedPreferences sharedPreferences = getSharedPreferences("UserNote", MODE_PRIVATE);
+            String savedNote = sharedPreferences.getString("user_note", "");
+
         }
-        // Retrieving stored data from SharedPreferences
-        SharedPreferences sharedPreferences = getSharedPreferences("UserNotes", MODE_PRIVATE);
-        String savedNote = sharedPreferences.getString("user_note", "");
-
-
-        // Populating EditText fields with stored data
-        input.setText(savedNote);
-
-
 
     }
 
 
     public void launchNewNote(View view){
+        //launching a new page when clicking add Note button
         Intent intent_add_note = new Intent(this, New_note_detail.class);
         startActivity(intent_add_note);
     }

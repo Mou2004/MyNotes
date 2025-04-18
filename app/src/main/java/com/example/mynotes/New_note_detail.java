@@ -49,10 +49,13 @@ public class New_note_detail extends AppCompatActivity {
    public void saveNote(View view) {
        TextView note = findViewById(R.id.Note_input_multiline);
        String ourNote = note.getText().toString();
+       //toast is a popup text that appears for a few seconds
        Toast.makeText(this, "Note Saved", Toast.LENGTH_SHORT).show();
+
        Intent intentSaveButton = new Intent(this, MainActivity.class);
        intentSaveButton.putExtra("Note", ourNote);
        startActivity(intentSaveButton);
+
        // Storing data in SharedPreferences
 
        SharedPreferences sharedPreferences = getSharedPreferences("UserNote",MODE_PRIVATE);
